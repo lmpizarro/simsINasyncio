@@ -39,7 +39,7 @@ async def get_state_model():
        counter = await pool.get('COUNTER')
        for tag in proc.get_tags():
            x = await pool.get(tag)
-           proc.tags[tag]['var'] = x
+           proc.tags[tag]['var'] = float(x)
        print(counter, proc)
        await asyncio.sleep(1)
 
@@ -71,7 +71,7 @@ async def wshandler(request):
                 counter = await pool.get('COUNTER')
                 for tag in proc.get_tags():
                     x = await pool.get(tag)
-                    proc.tags[tag]['var'] = x
+                    proc.tags[tag]['var'] = float(x)
                 print(counter)
                        
                 await ws.send_str(str(proc))
@@ -122,5 +122,7 @@ if __name__ == '__main__':
     try:
         loop.run_forever()
     except KeyboardInterrupt:
-        loop.run_until_complete(finish(app, srv, handler))    
-    loop.close()
+        loop.run_until_complete(finish(app, srv, handler))
+    finally:
+        print('closing loop')        
+        loop.close()
