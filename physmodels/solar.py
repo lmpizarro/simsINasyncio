@@ -1,4 +1,3 @@
-from datetime import timezone
 from pysolar import solar
 import datetime
 import pytz
@@ -15,16 +14,19 @@ class SolarRad:
         self.lat = lat_deg
         self.long = long_deg
 
-    def set(self, date=None):
+    def set(self, counter, date=None):
         if date == None:
             date = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
 
         self.altitude_deg = solar.get_altitude(self.lat, self.long, date)
         self.rs = solar.radiation.get_radiation_direct(date, self.altitude_deg)
  
-    def get(self):
-        self.set()
+    def get(self, counter, date=None):
+        self.set(counter, date=None)
         return self.rs
+
+    def __str__(self):
+        return 'Solar Radiation {}'.format(self.rs)
 
 class TempAmb:
     def __init__ (self, cloud=.5):
@@ -32,11 +34,13 @@ class TempAmb:
         self.solarRad = SolarRad()
         self.cloud = cloud
 
-    def set(self):
-        self.solarRad.set()
+    def set(self, counter, date=None):
+        self.solarRad.set(counter, date)
         self.tamb = self.cloud * ((self.solarRad.rs * 0.05 + 258.15) - 273.15)
 
-    def get(self):
-        self.set()
+    def get(self, counter, date=None):
+        self.set(counter, date)
         return self.tamb
 
+    def __str__(self):
+        return 'TEMP:AMB {}'.format(self.tamb)

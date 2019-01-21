@@ -1,6 +1,6 @@
 import math
 import simplejson as json
-import solar
+from physmodels import solar, temptank
 from decimal import Decimal
 
 class Proceso:
@@ -10,6 +10,7 @@ class Proceso:
         self.counter = 0
         self.solarRad = solar.SolarRad()
         self.tempAmb = solar.TempAmb()
+        self.tempTank = temptank.TempTank()
         self.tags={
                    'TEMP:WATER':{ 
                       'func': self.set_temp_water,
@@ -20,6 +21,10 @@ class Proceso:
                    'RAD:SOLAR':{
                       'func': self.set_rad_solar,
                       'var': 0},
+                   'TEMP:TANK':{
+                       'func': self.set_temp_tank,
+                       'var': 0
+                              },
                         }
 
     def set_time(self, time):
@@ -34,15 +39,19 @@ class Proceso:
                 math.sin(6.28 * self.counter / 100) + 10
 
     def set_rad_solar(self):
-        self.tags['RAD:SOLAR']['var'] = Decimal(self.solarRad.get())
+        self.tags['RAD:SOLAR']['var'] = Decimal(self.solarRad.get(self.counter))
 
     def set_temp_amb(self):
-        self.tags['TEMP:AMB']['var'] = self.tempAmb.get()
+        self.tags['TEMP:AMB']['var'] = self.tempAmb.get(self.counter)
+
+    def set_temp_tank(self):
+        self.tags['TEMP:TANK']['var'] = self.tempTank.get(self.counter)
 
     def reset(self):
         for tag in self.tags:
             self.tags[tag]['var'] = 0
         self.counter = 0
+
 
     def __str__(self):
         return json.dumps(self.get_states())
